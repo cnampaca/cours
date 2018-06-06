@@ -1,6 +1,6 @@
 # Configuration d’un serveur virtuel sécurisé en local
 
-Prérequis : une machine avec une distribution de Linux avec SSH et Apache installés. Nous allons partir du principe que nous allons configurer le serveur non pas directement mais en y accédant via SSH depuis notre machine.
+Prérequis : une machine avec une distribution de Linux avec SSH et Apache installés. Nous allons partir du principe que nous allons configurer le serveur non pas directement mais en y accédant via SSH depuis notre machine. Nous travaillerons avec un serveur situé une VirtualBox.
 
 Avant de quitter le serveur après l’installation, nous récupérons son adresse IP :
 
@@ -20,7 +20,7 @@ On rentre le mot de passe et on est connecté.
 
 Note : ici sur une machine VirtualBox ça ne fonctionnera pas tel quel, mais c’est le principe dans la vraie vie.
 
-En local, le plus simple est de mettre ne place la redirection de ports dans les options avancées de l’onglet réseau de VirtualBox.
+En local, le plus simple est de mettre en place la redirection de ports dans les options avancées de l’onglet réseau de VirtualBox.
 
 Le principe est de rediriger la machine locale vers la machine virtuelle par le biais d’une association d’IP et de ports.
 
@@ -29,7 +29,7 @@ Le principe est de rediriger la machine locale vers la machine virtuelle par le 
 | 127.0.0.1      | 8080          | 10.0.2.15  | 80            |
 | 127.0.0.1      | 2222          | 10.0.2.15  | 22            |
 
-Ainsi faire appel à localhost:8080 dans la barre d’adresse revient à faire un localhost sur la machine virtuelle, et on peut se connecter en SSH de la manière suivante :
+Ainsi, faire appel à localhost:8080 dans la barre d’adresse revient à faire un localhost sur la machine virtuelle, et on peut se connecter en SSH de la manière suivante :
 
 ```
 ssh cnam@localhost -p 2222
@@ -48,11 +48,11 @@ Plutôt qu’un accès par mot de passe, nous pouvons mettre en place une identi
 ### Génération des clés sur notre poste
 
 ```
-ssh-keygen -t dsa -b 4096 -C "website"
+ssh-keygen -t dsa -b 4096 -c "website"
 ```
 - -t permet de définir le type de clé (rsa/dsa)
 - -b permet de définir la force (nombre de bits) de l’encodage (minimum 1024, 2048 ou 4096 pour être tranquille)
-- -C permet d’ajouter un commentaire, ce qui peut aider à s’y retrouver si on doit gérer plusieurs clés.
+- -c permet d’ajouter un commentaire, ce qui peut aider à s’y retrouver si on doit gérer plusieurs clés. Ici nous mettons le nom du projet.
 
 Si aucune option n’est renseignée, ssh-keygen va poser des questions et on pourra renseigner ses choix à la volée.
 
@@ -64,10 +64,10 @@ Pour copier la clé sur le serveur, il faut utiliser la commande ssh-copy-id don
 ```
 ssh-copy-id -i ~/.ssh/mykey user@host
 ```
-Le dossier .ssh est automatiquement créé s’il n’existe pas. Le fichier authorized_keys est édité ou automatiquement créé s’il n’existe pas.
+Le dossier .ssh est automatiquement créé s’il n’existe pas sur la machine cible. Le fichier authorized_keys est édité ou automatiquement créé s’il n’existe pas.
 
 
-Quelle que soit la méthode retenue, nous pouvons à présent nous connecter à notre serveur.
+Quelle que soit la méthode retenue, nous pouvons à présent nous connecter à notre serveur de manière sécurisée.
 
 ## Création du répertoire et d’une page de test
 
@@ -83,7 +83,7 @@ Nous créons par commodité un dossier au sein du répertoire /var/www, auquel A
 Plusieurs choix sont possibles :
 
 - On peut ajouter l’utilisateur qui héberge les fichiers au groupe Apache
-- On peut intervenir sur les permissions pour que les fichiers soient accessibles en lecture et en exécution. Attention, le home directory de l’utilisateur, par défaut, ne permet pas l’affichage.
+- On peut intervenir sur les permissions pour que les fichiers soient accessibles en lecture et en exécution. Attention, le home directory de l’utilisateur, par défaut, a un accès restreint.
 - Enfin on peut simplement utiliser un lien symbolique. L’utilisateur héberge le dossier mais on crée un lien symbolique et on autorise Apache à le suivre.
 
 ```
@@ -101,14 +101,16 @@ vim /etc/hosts
 
 ping website` doit être concluant
 
-## Génération de la clé et du certificat avec openssl
+## Sécurisation https avec openssl
+Nous allons utiliser openssl pour sécuriser notre site et pouvoir y accéder via le protocole https.
+
 ### On génère la clé
+
 ```
 cd /etc/httpd/conf
 mkdir sslkeys
 cd sslkeys
 openssl genrsa -out website.key 1024
-chmod 400 website.key
 ```
 
 ### On génère le certificat
@@ -125,11 +127,13 @@ openssl x509 -in website.crt -text -noout
 ```
 
 ## Création d’un fichier de configuration dédié
+Nous pouvons à présent configurer un serveur virtuel pour notre projet.
+
 ```
 vim /etc/httpd/conf/vhosts.d/website.conf
 
 <VirtualHost *:443>
-    ServerAdmin admin@website
+    ServerAdmin admin@website.fr
     ServerName website
     DocumentRoot /var/www/html/website
 
@@ -150,7 +154,7 @@ On peut ajouter une exception car nous savons que nous ne sommes pas méchant.
 
 Pour un usage autre que personnel, il faudrait solliciter un certficat auprès d’un organisme de confiance.
 
-Pour information, OVH inclut un certificat Let’s encrypt avec ses hébergements, adapté à un site personnel. Pour un site professionnel, compter 50 euros HT/an. (Et dans ces cas-là rien à configurer, juste activer l’option.)
+Pour information, OVH inclut un certificat Let’s encrypt avec ses hébergements, adapté à un site personnel. Pour un site professionnel, compter 50 euros HT/an. (Et dans ces cas-là rien à configurer, juste activer l’option – et payer, éventuellement.)
 
 ## Amélioration de la sécurité
 
@@ -169,7 +173,7 @@ Rappelons en effet que par défaut nous héritons de la configuration globale d�
 
 De manière générale, on préfèrera commencer par fermer les vannes, et ouvrir seulement les robinets dont on a besoin.
 
-Nous pouvons également, pour des besoins spécifiques, n’accorder l’accès que sur identification par login et mot de passe (ce que nous pourrions également faire directement depuis le code de notre application, avec plus de marge de manœuvre sur la partie graphique de l’interface de connexion, c’est un choix à faire, la simplicité).
+Nous pouvons également, pour des besoins spécifiques, n’accorder l’accès que sur identification par login et mot de passe (ce que nous pourrions également faire directement depuis le code de notre application, avec plus de marge de manœuvre sur la partie graphique de l’interface de connexion, c’est un choix à faire, peut-être un arbitrage entre la simplicité côté serveur, et la convivialité côté application).
 
 Voici un exemple de mise en place de sécurisation par mot de passe :
 
@@ -204,7 +208,7 @@ Attention aux droits. Apache doit pouvoir accéder à ce fichier. Les droits par
 
 ## Transfert des fichiers de notre site
 
-Notre serveur est à présent configuré, selon nos souhaits, nous allons transférer les fichiers de notre site via le protocole ftp. On peut vérifier la présence d’un serveur ftp sur la machine avec la commande nmap. Le port 21 doit apparaître. Si aucun serveur ftp n’est installé, installer proftpd.
+À présent que notre serveur est configuré selon nos souhaits, nous allons transférer les fichiers de notre site via le protocole ftp. On peut vérifier la présence d’un serveur ftp sur la machine avec la commande nmap. Le port 21 doit apparaître. Si aucun serveur ftp n’est installé, installer proftpd.
 
 Par défaut la connexion en root n’est pas autorisée, ce qui est une bonne chose.
 
@@ -215,8 +219,8 @@ Il faut modifier le fichier de configuration.
 ```
 vim /etc/proftpd.conf
 
-# On ajoute la directive suivante qui cantonne chaque utilisateur
-# à son dossier personnel
+# On ajoute la directive suivante qui cantonne 
+# chaque utilisateur à son dossier personnel
 DefaultRoot ~
 ```
 
@@ -264,4 +268,4 @@ ftp [IP]
 
 Il est également possible de se connecter avec un logiciel tel que Filezilla en renseignant hôte, utilisateur, mot de passe et port, pour un transfert de fichiers plus aisé.
 
-Nous pouvons mettre notre site en ligne. Mais pas trop vite. En bon administrateur nous devons mettre en place un système de gestion des fichiers journaux, ce qui vaut bien une fiche à part.
+Nous pouvons mettre notre site en ligne. Mais pas trop vite. En bon administrateur nous devons mettre en place un système de gestion des [fichiers journaux](fichiers-journaux.md), ce qui vaut bien une fiche à part.
