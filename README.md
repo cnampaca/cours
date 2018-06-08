@@ -2,7 +2,10 @@
 
 Ce repository n’a d’autre but que de synthétiser et partager des choses apprises au fil du temps. Apprendre et partager, ça nous fait tous avancer.
 
-## Administration de serveurs
+## Gestion de projet
+- [Mise en place d’un nouveau projet](workflow/nouveau-projet.md)
 
-- [Configuration d’un serveur](configuration-serveur.md)
-- [Gestion des journaux](fichiers-journaux.md)
+## Administration de serveur web
+- [Configuration d’un serveur sécurisé](administration/configuration-serveur.md)
+- [Configuration multi-utilisateurs]((configuration-multi-utilisateurs.md))
+- [Gestion des journaux](administration/fichiers-journaux.md)
