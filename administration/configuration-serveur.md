@@ -99,7 +99,7 @@ vim /etc/hosts
 127.0.0.1   localhost   website
 ```
 
-ping `website` doit être concluant
+`ping website` doit être concluant
 
 ## Sécurisation https avec openssl
 Nous allons utiliser openssl pour sécuriser notre site et pouvoir y accéder via le protocole https.
