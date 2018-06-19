@@ -169,7 +169,7 @@ Options none
 ```
 sont des options à considérer attentivement.
 
-Rappelons en effet que par défaut nous héritons de la configuration globale d’Apache, et que `Options Indexes` affiche le contenu du répertoire si aucun fichier index.html (par défaut) n’est présent, ce que l’on ne souhaite pas forcément. L’option `FollowSymLinks quant à elle permet à Apache de suivre les liens symboliques pour aller chercher dossiers ou fichiers ailleurs dans le système. Ce qui est toujours à considérer avec prudence.
+Rappelons en effet que par défaut nous héritons de la configuration globale d’Apache, et que `Options Indexes` affiche le contenu du répertoire si aucun fichier index.html (par défaut) n’est présent, ce que l’on ne souhaite pas forcément. L’option `FollowSymLinks` quant à elle permet à Apache de suivre les liens symboliques pour aller chercher dossiers ou fichiers ailleurs dans le système. Ce qui est toujours à considérer avec prudence.
 
 De manière générale, on préfèrera commencer par fermer les vannes, et ouvrir seulement les robinets dont on a besoin.
 
