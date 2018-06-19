@@ -1,6 +1,6 @@
 # Configuration d’un serveur virtuel sécurisé en local
 
-Prérequis : une machine avec une distribution de Linux avec SSH et Apache installés. Nous allons partir du principe que nous allons configurer le serveur non pas directement mais en y accédant via SSH depuis notre machine. Nous travaillerons avec un serveur situé une VirtualBox.
+Prérequis : une machine avec une distribution de Linux avec SSH et Apache installés. Nous allons partir du principe que nous allons configurer le serveur non pas directement mais en y accédant via SSH depuis notre machine. Nous travaillerons avec un serveur situé sur une VirtualBox.
 
 Avant de quitter le serveur après l’installation, nous récupérons son adresse IP :
 
